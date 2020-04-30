@@ -23,25 +23,24 @@ const WHITE = "3";
 
 contract("Factory", async accounts => {
     let [alice, bob] = accounts;
-    it("should not be able to create a new game when there is only player in the blockchain", async () => {
+    let factory;
+    it("should create a new game when two players are there", async () => {
         factory = await Factory.deployed();
-        result = factory.createNewGame("alice", {from: alice});
-        assert.equal(result, false);
+        await factory.createNewGame("alice", {from: alice});
+        const result= await factory.createNewGame("bob", {from: bob});
+        // console.log(result);
+        assert.equal(result.logs[0].event, "NewGame");
+        assert.equal(result.logs[0].args[0],bob);
+        assert.equal(result.logs[0].args[1],alice);
     });
-    // it("can be queried with getTiles", async () => {
-    //     correctBoard = [
-    //         [0, 0, 0, 0, 0, 0, 0, 0],
-    //         [0, 0, 0, 0, 0, 0, 0, 0],
-    //         [0, 0, 0, 0, 0, 0, 0, 0],
-    //         [0, 0, 0, 3, 1, 0, 0, 0],
-    //         [0, 0, 0, 1, 3, 0, 0, 0],
-    //         [0, 0, 0, 0, 0, 0, 0, 0],
-    //         [0, 0, 0, 0, 0, 0, 0, 0],
-    //         [0, 0, 0, 0, 0, 0, 0, 0],
-    //     ];
-    //     board = await Board.deployed();
-    //     // console.log(await board.getTiles());
-    //     gameState = unflatten(convertToNumber(await board.getTiles()), 8);
-    //     assert.deepEqual(gameState, correctBoard, "initial game state is incorrect");
-    // });
-}
+    it("getMyColor is working fine", async () => {
+        factory = await Factory.deployed();
+        await factory.createNewGame("alice", {from: alice});
+        await factory.createNewGame("bob", {from: bob});
+        const bobColor= await factory.getMyColor({from:bob});
+        const aliceColor= await factory.getMyColor({from:alice});
+        console.log(aliceColor);
+        assert.equal(aliceColor,"WHITE");
+        assert.equal(bobColor,"BLACK");
+    });
+})
